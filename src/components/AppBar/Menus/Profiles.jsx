@@ -31,8 +31,8 @@ function Profiles() {
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
         >
-          <Avatar 
-            sx={{ width: 30, height: 30 }}
+          <Avatar
+            sx={{ width: 36, height: 36 }}
             alt="MihCong"
             src="https://yt3.ggpht.com/yti/ANjgQV_k1io7n5dpe3Fq7hlybah_GpbJHbveT4gVOLf8fT9LkqE=s88-c-k-c0x00ffffff-no-rj"
           />
@@ -48,10 +48,10 @@ function Profiles() {
         }}
       >
         <MenuItem >
-          <Avatar sx={{width:28, height:28, mr:2}} /> Profile
+          <Avatar sx={{ width:28, height:28, mr:2 }} /> Profile
         </MenuItem>
         <MenuItem >
-          <Avatar sx={{width:28, height:28, mr:2}} /> My account
+          <Avatar sx={{ width:28, height:28, mr:2 }} /> My account
         </MenuItem>
         <Divider />
         <MenuItem >
