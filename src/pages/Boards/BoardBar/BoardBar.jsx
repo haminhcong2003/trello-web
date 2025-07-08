@@ -9,6 +9,7 @@ import Avatar from '@mui/material/Avatar'
 import AvatarGroup from '@mui/material/AvatarGroup'
 import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import { capitalizeFirstLetter } from '~/utils/formatters'
 
 const MENU_STYLES = {
   color:'white',
@@ -25,7 +26,7 @@ const MENU_STYLES = {
 }
 
 
-function BoardBar() {
+function BoardBar({ board }) {
   return (
     <Box sx={{
       width: '100%',
@@ -36,20 +37,19 @@ function BoardBar() {
       gap: 2,
       paddingX: 2,
       overflow: 'auto',
-      bgcolor: ( theme) => (theme.palette.mode =='dark'? '#34495e': '#1976d2'),
-      borderBottom: '1px solid white'
+      bgcolor: ( theme) => (theme.palette.mode =='dark'? '#34495e': '#1976d2')
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Chip
           sx={MENU_STYLES}
           icon={<DashboardIcon />}
-          label="Khoa hoc tobi "
+          label={board?.title}
           clickable
         />
         <Chip
           sx={MENU_STYLES}
           icon={<VpnLockIcon/>}
-          label="Public/Private Workspace"
+          label={capitalizeFirstLetter(board?.type)}
           clickable
         />
         <Chip
@@ -94,7 +94,10 @@ function BoardBar() {
               width: 34,
               height: 34,
               fontSize: 16,
-              border:'none'
+              border:'none',
+              color: 'white',
+              cursor: 'pointer',
+              '&:first-of-type': { bgcolor: '#a4b0be' }
             }
           }}
         >
@@ -107,25 +110,25 @@ function BoardBar() {
           <tooltip title="Tobidangiu">
             <Avatar
               alt="Tobidangiu"
-              src="https://scontent.fsgn2-6.fna.fbcdn.net/v/t39.30808-1/479491645_1996701087508729_5074682762410612375_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_ohc=vGQqLQJRAt4Q7kNvwEdJVFh&_nc_oc=AdltVOuv9goGISlNC8pIlAFjoU16lYOS8jBd2pKTnMBhM8WqW1pM65Bv82A6WXcZeHE&_nc_zt=24&_nc_ht=scontent.fsgn2-6.fna&_nc_gid=2hBmtEvmtE-diWBCjvwjvA&oh=00_AfPil8CECrioQKmGIW2iQgEmziwkySjqhh1lyylE3F7Lag&oe=685F6E48"
+              src="https://yt3.ggpht.com/yti/ANjgQV_k1io7n5dpe3Fq7hlybah_GpbJHbveT4gVOLf8fT9LkqE=s88-c-k-c0x00ffffff-no-rj"
             />
           </tooltip>
           <tooltip title="Tobidangiu">
             <Avatar
               alt="Tobidangiu"
-              src="https://scontent.fsgn2-7.fna.fbcdn.net/v/t39.30808-1/495027497_1742606120012980_899123177403028429_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=108&ccb=1-7&_nc_sid=1d2534&_nc_ohc=6UoUrTMgiL0Q7kNvwFeibdg&_nc_oc=AdknfrtDUhbHpHnNzHSukcxXrf-3TDORAQ-sEHJnXTU--GNTTWL4mcrMFopVd2RCLxY&_nc_zt=24&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=-EAwvQANpc4nQ0dd1BurvA&oh=00_AfOoWIDwcmUYn7SZ6t5T9Z4emEzi-a-3NaFPTyXwMyeo7A&oe=685F7EDC"
+              src="https://yt3.ggpht.com/yti/ANjgQV_k1io7n5dpe3Fq7hlybah_GpbJHbveT4gVOLf8fT9LkqE=s88-c-k-c0x00ffffff-no-rj"
             />
           </tooltip>
           <tooltip title="Tobidangiu">
             <Avatar
               alt="Tobidangiu"
-              src="https://scontent.fsgn2-6.fna.fbcdn.net/v/t39.30808-6/295938545_1474290323035397_528555683095104869_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=67nz1dxeBVUQ7kNvwHzuXyc&_nc_oc=Adm5u_1Mi7pWrORpU_JK-KzzhLGv1oo6NC9vVxk-m6v42Yzln76HEz8LD_pZoBtKQpg&_nc_zt=23&_nc_ht=scontent.fsgn2-6.fna&_nc_gid=xiA2jHTKklOhSsNS4k5WKg&oh=00_AfNDYWE0fGTnGCnR4SYN6d39DcxEuaZPffETxdbycsEbGA&oe=685F862F"
+              src="https://yt3.ggpht.com/yti/ANjgQV_k1io7n5dpe3Fq7hlybah_GpbJHbveT4gVOLf8fT9LkqE=s88-c-k-c0x00ffffff-no-rj"
             />
           </tooltip>
           <tooltip title="Tobidangiu">
             <Avatar
               alt="Tobidangiu"
-              src="https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.6435-9/119899917_1005985749865859_3467866507643683807_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=5-f31IK67OkQ7kNvwFvTspD&_nc_oc=Adn8TCR9qHHPzXrZd7q_sMbXxJT6ueT1HgCxSGZOq8ffIbauYMd-62mi6LpJp_rrV_Q&_nc_zt=23&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=D3aGb6KmmfL0rUK7YD8YMQ&oh=00_AfNrTKLp2F3hAnRBxqm02tucZ-NGToythgjvpN2_55KS_g&oe=688112B1"
+              src="https://yt3.ggpht.com/yti/ANjgQV_k1io7n5dpe3Fq7hlybah_GpbJHbveT4gVOLf8fT9LkqE=s88-c-k-c0x00ffffff-no-rj"
             />
           </tooltip>
           <tooltip title="Tobidangiu">
