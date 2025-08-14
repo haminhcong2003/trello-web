@@ -1,19 +1,20 @@
 import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
-import { mapOrder } from '~/utils/sorts'
-import { DndContext,
-  MouseSensor,
-  TouchSensor,
+import {
+  DndContext,
+  // MouseSensor,
+  // TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
   defaultDropAnimationSideEffects,
   closestCorners,
-  closestCenter,
+  // closestCenter,
   pointerWithin,
-  rectIntersection,
+  // rectIntersection,
   getFirstCollision
- } from '@dnd-kit/core'
+} from '@dnd-kit/core'
+import { MouseSensor, TouchSensor } from '~/customLibraries/DndKitSensors'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Column from './ListColumns/Column/Column'
@@ -24,8 +25,8 @@ import { generatePlaceholderCard } from '~/utils/formatters'
 const ACTIVE_DRAG_ITEM_TYPE ={
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
-} 
-function BoardContent({ board }) {
+}
+function BoardContent({ board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumn, deleteColumnDetails }) {
   //const pointerSensor = useSensor( PointerSensor, { activationConstraint:{ distance: 10 } } )
   //yeu cau chuot di chuyen 10px  thi moi  kich hoat  event, fix truong hop click bi goi event
   const mouseSensor = useSensor( MouseSensor, { activationConstraint:{ distance: 10 } } )
@@ -44,7 +45,8 @@ function BoardContent({ board }) {
   const lastOverId = useRef(null)
 
   useEffect(() => {
-    setOrderedColumns(mapOrder ( board?.columns, board?.columnOrderIds, '_id' ))
+    //column da duoc sap xep o component cha
+    setOrderedColumns(board.columns)
   }, [board])
   //tim mot cai column theo card id
   const findColumnByCardId =(cardId) => {
@@ -58,7 +60,8 @@ function BoardContent({ board }) {
     over,
     activeColumn,
     activeDraggingCardId,
-    activeDraggingCardData
+    activeDraggingCardData,
+    triggerFrom
   ) => {
     setOrderedColumns(prevColumns => {
       //tim vi tri cua cai overcardId dich noi ma activeCard sap dc tha
@@ -100,7 +103,9 @@ function BoardContent({ board }) {
         //cap nhat lai mang cardoderids cho chuan du lieu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
-
+      if (triggerFrom === 'handleDragEnd') {
+        moveCardToDifferentColumn(activeDraggingCardId, oldColumnWhenDraggingCard._id, nextOverColumn._id, nextColumns)
+      }
       return nextColumns
     })
   }
@@ -123,7 +128,7 @@ function BoardContent({ board }) {
     //can dam bao neu khong ton tai active hoac over (khi keo ra khoi pham vi container)thi khong lam gi (tranh crash trang)
     if (!active || !over) return
     // activeDraggingCard la cai card dang duoc keo
-    const { id: activeDraggingCardId, data: { current: activeDraggingCardData}} = active
+    const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active
     //overCard la cai card dang tuong tac tren hoac duoi so voi cai card dang duoc keo o tren
     const { id: overCardId } = over
     //tim 2 cai column theo cardId
@@ -139,7 +144,8 @@ function BoardContent({ board }) {
         over,
         activeColumn,
         activeDraggingCardId,
-        activeDraggingCardData
+        activeDraggingCardData,
+        'handleDragOver'
       )
     }
   }
@@ -152,7 +158,7 @@ function BoardContent({ board }) {
     //xu ly keo tha card
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
       // activeDraggingCard la cai card dang duoc keo
-      const { id: activeDraggingCardId, data: { current: activeDraggingCardData}} = active
+      const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active
       //overCard la cai card dang tuong tac tren hoac duoi so voi cai card dang duoc keo o tren
       const { id: overCardId } = over
       //tim 2 cai column theo cardId
@@ -160,6 +166,7 @@ function BoardContent({ board }) {
       const overColumn = findColumnByCardId(overCardId)
       //neu khong ton tai 1 trong 2 column thi khong lam gi het , tranh crash trang
       if (!activeColumn || !overColumn) return
+      //hanh dong keo tha card giua 2 column khac nhau
       if (oldColumnWhenDraggingCard._id !== overColumn._id) {
         moveCardBetweenDifferentColumns(
           overColumn,
@@ -168,7 +175,8 @@ function BoardContent({ board }) {
           over,
           activeColumn,
           activeDraggingCardId,
-          activeDraggingCardData
+          activeDraggingCardData,
+          'handleDragEnd'
         )
       } else {
         //keo tha card trong cung 1 column
@@ -177,15 +185,19 @@ function BoardContent({ board }) {
         //lay vi tri moi (tu over)
         const newCardIndex = overColumn?.cards?.findIndex(c => c._id === overCardId )
         const dndOderedCards = arrayMove(oldColumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
+        const dndOderedCardIds = dndOderedCards.map(card => card._id)
+        //goi update state de tranh delay
         setOrderedColumns(prevColumns => {
           const nextColumns = cloneDeep(prevColumns)
           //tim toi column dang tha
           const targetColumn = nextColumns.find(column => column._id === overColumn._id)
           //cap nhat lai 2 gia tri mang card va cardorderids trong targetColumn
           targetColumn.cards = dndOderedCards
-          targetColumn.cardOrderIds = dndOderedCards.map(card => card._id)
+          targetColumn.cardOrderIds = dndOderedCardIds
           return nextColumns
         })
+        //
+        moveCardInTheSameColumn(dndOderedCards, dndOderedCardIds, oldColumnWhenDraggingCard._id)
       }
     }
     //Xu ly keo tha column trong boardContent
@@ -198,13 +210,15 @@ function BoardContent({ board }) {
         const newColumnIndex = orderedColumns.findIndex(c => c._id ===over.id )
         //dung arraymove cua thg dnd kit de sap xep lai mang column ban dau
         const dndOderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
+        //cap nhat lai state columns ban dau sau khi keo tha
+        setOrderedColumns(dndOderedColumns)
         // 3 dong nay de xu ly du lieu goi api
         // const dndOderedColumnsIds = dndOderedColumns.map(c => c._id)
         // console.log('dndOderedColumns:', dndOderedColumns)
         // console.log('dndOderedColumnsIds:', dndOderedColumnsIds)
 
-        //cap nhat lai state columns ban dau sau khi keo tha
-        setOrderedColumns(dndOderedColumns)
+        moveColumns(dndOderedColumns)
+
       }
     }
     //nhung du lieu sau khi keo tha se luon phai dua ve gia tri null mac dinh ban dau
@@ -262,7 +276,12 @@ function BoardContent({ board }) {
         height: (theme) => theme.trello.boardContentHeight,
         p: '10px 0'
       }}>
-        <ListColumns columns={ orderedColumns} />
+        <ListColumns
+          columns = { orderedColumns}
+          createNewColumn = {createNewColumn}
+          createNewCard = {createNewCard}
+          deleteColumnDetails={deleteColumnDetails}
+        />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}/>}
